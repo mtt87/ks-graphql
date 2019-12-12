@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Flex, Box, Text, Button } from 'rebass';
-import { Input, Label } from '@rebass/forms';
-import { useMutation } from '@apollo/react-hooks';
-import { gql } from 'apollo-boost';
+import React, { useState } from "react";
+import { Flex, Box, Text, Button } from "rebass";
+import { Input, Label } from "@rebass/forms";
+import { useMutation } from "@apollo/react-hooks";
+import { gql } from "apollo-boost";
 
 const UPDATE_ACCOUNT = gql`
   mutation updateAccount($id: ID!, $input: AccountInput!) {
@@ -15,17 +15,17 @@ const UPDATE_ACCOUNT = gql`
 `;
 
 export default function UpdateAccount() {
-  const [id, setId] = useState('');
-  const [name, setName] = useState('');
+  const [id, setId] = useState("");
+  const [name, setName] = useState("");
   const [balance, setBalance] = useState(0);
-  const [updateAccount] = useMutation(UPDATE_ACCOUNT, {
+  const [updateAccount, { error }] = useMutation(UPDATE_ACCOUNT, {
     variables: {
       id,
       input: {
         name,
-        balance: parseFloat(balance),
-      },
-    },
+        balance: parseFloat(balance)
+      }
+    }
   });
   return (
     <Flex px={3} flexDirection="column">
@@ -45,6 +45,11 @@ export default function UpdateAccount() {
         <Input value={balance} onChange={e => setBalance(e.target.value)} />
       </Box>
       <Button onClick={() => updateAccount()}>Update account</Button>
+      {error && (
+        <Text my={3} color="red" fontSize={0}>
+          {error.message}
+        </Text>
+      )}
     </Flex>
   );
 }

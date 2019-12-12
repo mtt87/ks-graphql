@@ -26,7 +26,9 @@ const GET_USER = gql`
 const Home = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState(null);
-  const [getUser, { loading, data, error }] = useLazyQuery(GET_USER);
+  const [getUser, { loading, data, error }] = useLazyQuery(GET_USER, {
+    fetchPolicy: "cache-and-network"
+  });
   const login = userId => {
     setUserId(userId);
     setIsAuthenticated(true);
@@ -52,9 +54,6 @@ const Home = () => {
     if (loading) {
       return <Text>Loading...</Text>;
     }
-    if (error) {
-      return <Text>Error</Text>;
-    }
     if (!data) {
       return null;
     }
@@ -65,10 +64,8 @@ const Home = () => {
             email={data.user.email}
             name={data.user.name}
             avatarUrl={data.user.avatarUrl}
+            accounts={data.user.accounts}
           />
-          {data.user.accounts.map(a => (
-            <Account key={a.id} id={a.id} balance={a.balance} name={a.name} />
-          ))}
         </Box>
         <Box>
           <UpdateAccount />

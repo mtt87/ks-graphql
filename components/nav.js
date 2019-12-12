@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Flex, Button, Box, Text } from "rebass";
 import { useLazyQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
+import moment from "moment";
+import useInterval from "@use-it/interval";
 
 const LIST_ACCOUNTS = gql`
   query listAccounts {
+    accountsLastUpdated @client
     accounts {
       id
       name
@@ -14,7 +17,12 @@ const LIST_ACCOUNTS = gql`
 `;
 
 const Nav = ({ login, logout, isAuthenticated = false, userId }) => {
-  const [listAccounts, { loading, data, error }] = useLazyQuery(LIST_ACCOUNTS);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [listAccounts, { loading, data, error }] = useLazyQuery(LIST_ACCOUNTS, {
+    fetchPolicy: "cache-and-network",
+    onCompleted: data =>
+      setLastUpdated(moment(data.accountsLastUpdated).fromNow())
+  });
   useEffect(() => {
     if (isAuthenticated && userId) {
       listAccounts({
@@ -26,14 +34,27 @@ const Nav = ({ login, logout, isAuthenticated = false, userId }) => {
       });
     }
   }, [isAuthenticated, userId]);
+  useInterval(() => {
+    if (data) {
+      setLastUpdated(moment(data.accountsLastUpdated).fromNow());
+    }
+  }, 5000);
   const renderBalance = () => {
-    if (!isAuthenticated || loading || error || !data) {
+    if (!isAuthenticated || loading || !data) {
       return null;
     }
     const totalBalance = data.accounts.reduce((acc, val) => {
       return (acc += val.balance);
     }, 0);
-    return <Text>Total balance: {totalBalance}</Text>;
+    return (
+      <Flex>
+        <Text mr={4}>Total balance: {totalBalance}</Text>
+        <Text color="grey">
+          Last updated:{" "}
+          {lastUpdated || moment(data.accountsLastUpdated).fromNow()}
+        </Text>
+      </Flex>
+    );
   };
   return (
     <nav>
