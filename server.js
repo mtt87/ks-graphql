@@ -1,9 +1,9 @@
-const express = require('express');
-const _ = require('lodash');
-const bodyParser = require('body-parser');
-const { ApolloServer, gql } = require('apollo-server-express');
-const cors = require('cors');
-const data = require('./data.json');
+const express = require("express");
+const _ = require("lodash");
+const bodyParser = require("body-parser");
+const { ApolloServer, gql } = require("apollo-server-express");
+const cors = require("cors");
+const data = require("./data.json");
 
 const { PORT = 3001 } = process.env;
 
@@ -54,15 +54,15 @@ const resolvers = {
     accounts: (_, {}, { userId }) => {
       const userData = data.find(u => u.id === userId);
       return userData.accounts;
-    },
+    }
   },
   Account: {
     user: ({ id: accountId }) => {
       const user = _.find(data, u =>
-        _.find(u.accounts, a => a.id === accountId),
+        _.find(u.accounts, a => a.id === accountId)
       );
       return user;
-    },
+    }
   },
   Mutation: {
     updateAccount: (_, { id, input }) => {
@@ -78,8 +78,8 @@ const resolvers = {
       account.name = input.name;
       account.balance = input.balance;
       return account;
-    },
-  },
+    }
+  }
 };
 
 const app = express();
@@ -91,19 +91,19 @@ const server = new ApolloServer({
   resolvers,
   introspection: true,
   context: ({ req }) => {
-    const userId = req.header('user-id');
+    const userId = req.header("user-id");
     if (userId) {
       return {
-        userId,
+        userId
       };
     }
   },
   formatError: err => {
-    console.log(JSON.stringify(err));
-  },
+    console.log(err.message);
+  }
 });
 
-server.applyMiddleware({ app, path: '/api/graphql', cors: true });
+server.applyMiddleware({ app, path: "/api/graphql", cors: true });
 app.listen(PORT, () => {
   console.log(`Server listening on: ${PORT}`);
 });

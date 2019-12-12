@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import Nav from '../components/nav';
-import User from '../components/User';
-import { gql } from 'apollo-boost';
-import { Flex, Box, Text } from 'rebass';
-import { useLazyQuery } from '@apollo/react-hooks';
-import UpdateAccount from '../components/UpdateAccount';
-import Account from '../components/Account';
+import React, { useState, useCallback, useEffect } from "react";
+import Nav from "../components/Nav";
+import User from "../components/User";
+import { gql } from "apollo-boost";
+import { Flex, Box, Text } from "rebass";
+import { useLazyQuery } from "@apollo/react-hooks";
+import UpdateAccount from "../components/UpdateAccount";
+import Account from "../components/Account";
 
 const GET_USER = gql`
   query getUser($id: ID!) {
@@ -40,19 +40,11 @@ const Home = () => {
     if (isAuthenticated && userId) {
       getUser({
         variables: {
-          id: userId,
-        },
+          id: userId
+        }
       });
     }
   }, [isAuthenticated, userId]);
-
-  const calculateTotalBalance = useCallback(() => {
-    if (data) {
-      return data.user.accounts.reduce((acc, val) => {
-        return (acc += val.balance);
-      }, 0);
-    }
-  }, [data]);
   const renderContent = () => {
     if (!isAuthenticated) {
       return <Text textAlign="center">You need to login</Text>;
@@ -87,7 +79,7 @@ const Home = () => {
   return (
     <div>
       <Nav
-        totalBalance={calculateTotalBalance()}
+        userId={userId}
         login={login}
         logout={logout}
         isAuthenticated={isAuthenticated}
