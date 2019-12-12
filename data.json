@@ -1,0 +1,38 @@
+[
+  {
+    "id": "user_1",
+    "name": "Mattia",
+    "email": "mattia.asti@11fs.com",
+    "avatarUrl": "https://placedog.net/200/200",
+    "accounts": [
+      {
+        "id": "account_1",
+        "name": "account_1",
+        "balance": 12
+      },
+      {
+        "id": "account_2",
+        "name": "account_2",
+        "balance": 47.5
+      }
+    ]
+  },
+  {
+    "id": "user_2",
+    "name": "Franky",
+    "email": "franky@11fs.com",
+    "avatarUrl": "https://placedog.net/300/300",
+    "accounts": [
+      {
+        "id": "account_3",
+        "name": "account_3",
+        "balance": 23.5
+      },
+      {
+        "id": "account_4",
+        "name": "account_4",
+        "balance": 1.7
+      }
+    ]
+  }
+]

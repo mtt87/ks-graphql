@@ -1,88 +1,100 @@
-import React from 'react'
-import Head from 'next/head'
-import Nav from '../components/nav'
+import React, { useState, useCallback, useEffect } from 'react';
+import Nav from '../components/nav';
+import User from '../components/User';
+import { gql } from 'apollo-boost';
+import { Flex, Box, Text } from 'rebass';
+import { useLazyQuery, useQuery } from '@apollo/react-hooks';
+import UpdateAccount from '../components/UpdateAccount';
+import Account from '../components/Account';
 
-const Home = () => (
-  <div>
-    <Head>
-      <title>Home</title>
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
+const GET_USER = gql`
+  query getUser($id: ID!) {
+    user(id: $id) {
+      id
+      name
+      email
+      avatarUrl
+      accounts {
+        id
+        balance
+        name
+      }
+    }
+  }
+`;
 
-    <Nav />
+const Home = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [getUser, { loading, data, error }] = useLazyQuery(GET_USER);
+  const login = userId => {
+    setUserId(userId);
+    setIsAuthenticated(true);
+  };
+  const logout = () => {
+    setUserId(null);
+    setIsAuthenticated(false);
+  };
 
-    <div className="hero">
-      <h1 className="title">Welcome to Next.js!</h1>
-      <p className="description">
-        To get started, edit <code>pages/index.js</code> and save to reload.
-      </p>
+  useEffect(() => {
+    if (isAuthenticated && userId) {
+      getUser({
+        variables: {
+          id: userId,
+        },
+      });
+    }
+  }, [isAuthenticated, userId]);
 
-      <div className="row">
-        <a href="https://nextjs.org/docs" className="card">
-          <h3>Documentation &rarr;</h3>
-          <p>Learn more about Next.js in the documentation.</p>
-        </a>
-        <a href="https://nextjs.org/learn" className="card">
-          <h3>Next.js Learn &rarr;</h3>
-          <p>Learn about Next.js by following an interactive tutorial!</p>
-        </a>
-        <a
-          href="https://github.com/zeit/next.js/tree/master/examples"
-          className="card"
-        >
-          <h3>Examples &rarr;</h3>
-          <p>Find other example boilerplates on the Next.js GitHub.</p>
-        </a>
-      </div>
+  const calculateTotalBalance = useCallback(() => {
+    if (data) {
+      return data.user.accounts.reduce((acc, val) => {
+        return (acc += val.balance);
+      }, 0);
+    }
+  }, [data]);
+  const renderContent = () => {
+    if (!isAuthenticated) {
+      return <Text textAlign="center">You need to login</Text>;
+    }
+    if (loading) {
+      return <Text>Loading...</Text>;
+    }
+    if (error) {
+      return <Text>Error</Text>;
+    }
+    if (!data) {
+      return null;
+    }
+    return (
+      <Flex justifyContent="space-between">
+        <Box flex={1}>
+          <User
+            email={data.user.email}
+            name={data.user.name}
+            avatarUrl={data.user.avatarUrl}
+          />
+          {data.user.accounts.map(a => (
+            <Account key={a.id} id={a.id} balance={a.balance} name={a.name} />
+          ))}
+        </Box>
+        <Box>
+          <UpdateAccount />
+        </Box>
+      </Flex>
+    );
+  };
+  return (
+    <div>
+      <Nav
+        totalBalance={calculateTotalBalance()}
+        login={login}
+        logout={logout}
+        isAuthenticated={isAuthenticated}
+      />
+      {renderContent()}
     </div>
+  );
+};
 
-    <style jsx>{`
-      .hero {
-        width: 100%;
-        color: #333;
-      }
-      .title {
-        margin: 0;
-        width: 100%;
-        padding-top: 80px;
-        line-height: 1.15;
-        font-size: 48px;
-      }
-      .title,
-      .description {
-        text-align: center;
-      }
-      .row {
-        max-width: 880px;
-        margin: 80px auto 40px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-      }
-      .card {
-        padding: 18px 18px 24px;
-        width: 220px;
-        text-align: left;
-        text-decoration: none;
-        color: #434343;
-        border: 1px solid #9b9b9b;
-      }
-      .card:hover {
-        border-color: #067df7;
-      }
-      .card h3 {
-        margin: 0;
-        color: #067df7;
-        font-size: 18px;
-      }
-      .card p {
-        margin: 0;
-        padding: 12px 0 0;
-        font-size: 13px;
-        color: #333;
-      }
-    `}</style>
-  </div>
-)
-
-export default Home
+export default Home;
