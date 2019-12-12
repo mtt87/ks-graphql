@@ -3,7 +3,7 @@ import Nav from '../components/nav';
 import User from '../components/User';
 import { gql } from 'apollo-boost';
 import { Flex, Box, Text } from 'rebass';
-import { useLazyQuery, useQuery } from '@apollo/react-hooks';
+import { useLazyQuery } from '@apollo/react-hooks';
 import UpdateAccount from '../components/UpdateAccount';
 import Account from '../components/Account';
 
